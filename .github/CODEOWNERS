@@ -1,0 +1,10 @@
+# @YOUR_GITHUB_ID を自分のGitHubユーザー名に置き換えてください（例：@nietz）
+# ここに書いたフォルダを変更するPRは、管理者のレビューが必須になります
+# （リポジトリ設定で「Require review from Code Owners」を有効にしたときに効きます）
+
+/Assets/Core/     @Nietz3203
+/ProjectSettings/ @Nietz3203
+/Packages/        @Nietz3203
+/.github/         @Nietz3203
+/.gitignore       @Nietz3203
+/.gitattributes   @Nietz3203
