@@ -13,7 +13,8 @@ namespace MiniGameFramework.EditorTools
     /// </summary>
     public static class MiniGameMenu
     {
-        const string MainScenePath = "Assets/Core/Scenes/Main.unity";
+        const string MainScenePath = GameLaunchSettings.MainScenePath;
+        const string TitleScenePath = GameLaunchSettings.TitleScenePath;
         const string CatalogPath = "Assets/Core/MiniGameCatalog.asset";
         const string MiniGamesRoot = "Assets/MiniGames";
         const string TemplateRoot = "Assets/MiniGames/_Template";
@@ -94,8 +95,10 @@ namespace MiniGameFramework.EditorTools
             catalog.games = infos;
             EditorUtility.SetDirty(catalog);
 
-            // Build Settings：Main を先頭に、ミニゲームのシーンを並べる
+            // Build Settings：Title → Main の順に置き、その後にミニゲームのシーンを並べる
+            // （ビルドしたゲームは先頭のシーンから始まる）
             var buildScenes = new List<EditorBuildSettingsScene>();
+            if (File.Exists(TitleScenePath)) buildScenes.Add(new EditorBuildSettingsScene(TitleScenePath, true));
             if (File.Exists(MainScenePath)) buildScenes.Add(new EditorBuildSettingsScene(MainScenePath, true));
             foreach (var path in infos.Select(i => i.scenePath).Distinct())
             {

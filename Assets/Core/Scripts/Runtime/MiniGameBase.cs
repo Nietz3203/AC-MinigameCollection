@@ -81,10 +81,22 @@ namespace MiniGameFramework
             if (Result == MiniGameResult.None) Result = MiniGameResult.Failure;
         }
 
-        /// <summary>効果音を鳴らす。ゲーム速度に合わせてピッチが上がる</summary>
+        /// <summary>効果音を鳴らす。ゲーム速度に合わせてピッチが上がり、設定画面の効果音の音量に従う</summary>
         protected void PlaySE(AudioClip clip, float volume = 1f)
         {
             MiniGameAudio.PlaySE(clip, volume);
+        }
+
+        /// <summary>BGM を鳴らす。ゲーム速度に合わせてピッチが上がり、設定画面の BGM の音量に従う。時間切れで自動で止まる</summary>
+        protected void PlayBGM(AudioClip clip, float volume = 1f, bool loop = true)
+        {
+            MiniGameAudio.PlayBGM(clip, volume, loop);
+        }
+
+        /// <summary>BGM を途中で止める</summary>
+        protected void StopBGM()
+        {
+            MiniGameAudio.StopBGM();
         }
     }
 }
