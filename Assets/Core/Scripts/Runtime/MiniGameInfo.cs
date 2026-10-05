@@ -33,5 +33,17 @@ namespace MiniGameFramework
         public string scenePath;
 
         public Sprite thumbnail;
+
+        [Header("BGM")]
+        [Tooltip("このミニゲームの BGM。空なら共通の BGM が流れる。\n" +
+                 "1倍速で、ゲームの長さ（Normal 4秒 / Long 8秒）に合う曲にすると、速度が上がってもぴったり合う")]
+        public AudioClip bgm;
+
+        [Tooltip("BGM の音量（設定画面の BGM 音量と掛け合わされる）")]
+        [Range(0f, 1f)]
+        public float bgmVolume = 1f;
+
+        [Tooltip("オンにすると BGM を流さない（共通の BGM も流れない）")]
+        public bool noBgm;
     }
 }
