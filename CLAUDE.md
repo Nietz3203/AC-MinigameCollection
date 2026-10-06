@@ -65,7 +65,8 @@ MiniGameStage がシーンにないときは、OnGUI の文字だけの簡易表
 | `Runtime/GameSettings.cs` | 音量（全体＝AudioListener.volume / BGM / 効果音）。PlayerPrefs に保存 |
 | `Runtime/GameLaunchSettings.cs` | タイトル → Main への受け渡し（`GameMode.Normal` / `Practice`、練習するゲーム、シーンパス） |
 | `Runtime/MiniGameHud.cs` | 仮の OnGUI 表示（指示文・結果・タイマー・ヘッダー）。フォントは Resources から読み込み。将来 uGUI に置き換える想定 |
-| `Runtime/BgmPlayer.cs` / `GameCursor.cs` | タイトル BGM / カーソル画像（DontDestroyOnLoad の単一インスタンス） |
+| `Runtime/BgmPlayer.cs` | シーンに置いた AudioSource で BGM をループ再生（音量は GameSettings の BGM 音量に連動）。シーンと一緒に破棄されるので、シーンを移ると止まる |
+| `Runtime/GameCursor.cs` | カーソル画像（DontDestroyOnLoad の単一インスタンス） |
 | `Title/TitleScreen.cs` | タイトル → モード選択（通常 / 練習 / 設定 / やめる）→ 操作説明 → Main。uGUI の Submit は無効化し、決定は MiniGameInput で統一 |
 | `Title/SettingsPanel.cs` | 音量スライダー（0〜1）と GameSettings の接続 |
 | `Editor/MiniGameMenu.cs` | メニュー「MiniGame」：初期セットアップ / **カタログとBuild Settingsを更新**（Title → Main → 各ミニゲームの順に登録） |
