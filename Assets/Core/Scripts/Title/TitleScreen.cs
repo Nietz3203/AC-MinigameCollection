@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -58,6 +59,12 @@ namespace MiniGameFramework.Title
         [SerializeField] SettingsPanel settingsPanel;
         [SerializeField] Button settingsBackButton;
 
+        [Header("演出（タイトル → モード選択）")]
+        [Tooltip("モード選択パネルが出てくるのにかける秒数。0 なら演出なしで即表示")]
+        [SerializeField] float modeIntroDuration = 0.35f;
+        [Tooltip("出てくるときの開始位置（本来の位置からのずれ）。(0, -80) なら下から上がってくる")]
+        [SerializeField] Vector2 modeIntroOffset = new Vector2(0f, -80f);
+
         enum Page { Title, Mode, Practice, HowTo, Settings }
 
         Page current;
@@ -66,6 +73,11 @@ namespace MiniGameFramework.Title
         GameObject lastSelected;
         bool loading;
         readonly List<Button> practiceButtons = new List<Button>();
+
+        RectTransform modeRect;
+        CanvasGroup modeGroup;
+        Vector2 modeBasePosition;
+        Coroutine modeIntro;
 
         void Awake()
         {
@@ -96,6 +108,11 @@ namespace MiniGameFramework.Title
                 else settingsButton.interactable = false;
             }
             if (settingsBackButton != null) settingsBackButton.onClick.AddListener(Back);
+
+            modeRect = modePanel.GetComponent<RectTransform>();
+            if (modeRect != null) modeBasePosition = modeRect.anchoredPosition;
+            modeGroup = modePanel.GetComponent<CanvasGroup>();
+            if (modeGroup == null) modeGroup = modePanel.AddComponent<CanvasGroup>();
 
             BuildPracticeList();
             Show(Page.Title);
@@ -138,7 +155,8 @@ namespace MiniGameFramework.Title
 
         void Update()
         {
-            if (loading) return;
+            // パネルが出てくる途中は操作を受け付けない
+            if (loading || modeIntro != null) return;
 
             // タイトル：どのボタンでも次へ
             if (current == Page.Title)
@@ -182,6 +200,9 @@ namespace MiniGameFramework.Title
         /// <param name="select">最初に選ぶ項目。null ならその画面の既定の項目</param>
         void Show(Page page, GameObject select = null)
         {
+            bool fromTitle = current == Page.Title && page == Page.Mode;
+            StopModeIntro();
+
             current = page;
             titlePanel.SetActive(page == Page.Title);
             modePanel.SetActive(page == Page.Mode);
@@ -216,6 +237,37 @@ namespace MiniGameFramework.Title
             var first = select != null ? select : defaultSelection;
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(first);
             lastSelected = first;
+
+            if (fromTitle && modeIntroDuration > 0f) modeIntro = StartCoroutine(ModeIntro());
+        }
+
+        /// <summary>モード選択パネルを、ずらした位置から本来の位置へ動かしながらフェードインする</summary>
+        IEnumerator ModeIntro()
+        {
+            modeGroup.interactable = false;
+            for (float t = 0f; t < modeIntroDuration; t += Time.unscaledDeltaTime)
+            {
+                float k = t / modeIntroDuration;
+                float eased = 1f - (1f - k) * (1f - k) * (1f - k); // ease-out（最後にゆっくり止まる）
+                modeGroup.alpha = k;
+                if (modeRect != null) modeRect.anchoredPosition = modeBasePosition + modeIntroOffset * (1f - eased);
+                yield return null;
+            }
+            modeIntro = null;
+            StopModeIntro();
+        }
+
+        /// <summary>演出を止めて、パネルを本来の位置・不透明に戻す</summary>
+        void StopModeIntro()
+        {
+            if (modeIntro != null)
+            {
+                StopCoroutine(modeIntro);
+                modeIntro = null;
+            }
+            modeGroup.alpha = 1f;
+            modeGroup.interactable = true;
+            if (modeRect != null) modeRect.anchoredPosition = modeBasePosition;
         }
 
         void ShowHowTo(Page returnPage)
