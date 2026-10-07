@@ -16,8 +16,12 @@ MonoBehaviour:
   title: "\u3088\u3051\u308D\uFF01\uFF08\u30B5\u30F3\u30D7\u30EB\uFF09"
   author: Core
   instruction: "\u3088\u3051\u308D\uFF01"
+  description: "\u4E0A\u304B\u3089\u843D\u3061\u3066\u304F\u308B\u5CA9\u306B\u5F53\u305F\u3089\u306A\u3044\u3088\u3046\u3001\n\u5DE6\u53F3\u306B\u79FB\u52D5\u3057\u3066\u3088\u3051\u3088\u3046\uFF01\n\n\u4E00\u5B9A\u6642\u9593\u3088\u3051\u7D9A\u3051\u308C\u3070\u30AF\u30EA\u30A2\uFF01"
   inputType: 0
   length: 4
   judgeType: 0
   scenePath: Assets/MiniGames/_Template/Dodge.unity
   thumbnail: {fileID: 0}
+  bgm: {fileID: 0}
+  bgmVolume: 1
+  noBgm: 0

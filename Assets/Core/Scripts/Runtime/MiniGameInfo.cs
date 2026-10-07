@@ -21,6 +21,10 @@ namespace MiniGameFramework
         [Tooltip("開始前に大きく表示される指示。例：よけろ！")]
         public string instruction;
 
+        [Tooltip("練習モードの操作説明の【説明】に出る文。遊び方を数行で書く（空なら指示文が出る）。\n【操作タイプ】は inputType から自動で表示されるので、ここには書かなくてよい")]
+        [TextArea(3, 8)]
+        public string description;
+
         public InputType inputType = InputType.DirectionAndButton;
 
         [Tooltip("Normal = 4秒 / Long = 8秒（1倍速時）")]
