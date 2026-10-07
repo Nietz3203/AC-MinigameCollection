@@ -1,5 +1,5 @@
 # 改行コードを自動で正規化する（Windows / Mac 混在対策）
-* text=auto
+* text=auto eol=lf
 
 # C# とUnityのテキスト形式アセット
 *.cs          text diff=csharp
