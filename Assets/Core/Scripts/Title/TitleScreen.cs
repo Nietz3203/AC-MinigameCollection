@@ -51,6 +51,8 @@ namespace MiniGameFramework.Title
         [Header("操作説明")]
         [Tooltip("「通常プレイ」「練習：〇〇」を表示するテキスト（なくてもよい）")]
         [SerializeField] TMP_Text howToModeText;
+        [Tooltip("操作説明の本文。通常プレイではシーンに書いた文、練習ではミニゲームの説明文（MiniGameInfo の description）を表示する")]
+        [SerializeField] TMP_Text howToBodyText;
         [SerializeField] Button startButton;
         [SerializeField] Button howToBackButton;
 
@@ -71,6 +73,7 @@ namespace MiniGameFramework.Title
         Page howToReturnPage;
         GameObject defaultSelection;
         GameObject lastSelected;
+        string normalHowToText;
         bool loading;
         readonly List<Button> practiceButtons = new List<Button>();
 
@@ -108,6 +111,8 @@ namespace MiniGameFramework.Title
                 else settingsButton.interactable = false;
             }
             if (settingsBackButton != null) settingsBackButton.onClick.AddListener(Back);
+
+            if (howToBodyText != null) normalHowToText = howToBodyText.text;
 
             modeRect = modePanel.GetComponent<RectTransform>();
             if (modeRect != null) modeBasePosition = modeRect.anchoredPosition;
@@ -273,13 +278,38 @@ namespace MiniGameFramework.Title
         void ShowHowTo(Page returnPage)
         {
             howToReturnPage = returnPage;
+            var practiceGame = GameLaunchSettings.Mode == GameMode.Practice ? GameLaunchSettings.PracticeGame : null;
             if (howToModeText != null)
             {
-                howToModeText.text = GameLaunchSettings.Mode == GameMode.Practice && GameLaunchSettings.PracticeGame != null
-                    ? $"練習：{GameLaunchSettings.PracticeGame.title}"
-                    : "通常プレイ";
+                howToModeText.text = practiceGame != null ? $"練習：{practiceGame.title}" : "通常プレイ";
+            }
+            if (howToBodyText != null)
+            {
+                howToBodyText.text = practiceGame != null ? PracticeHowToText(practiceGame) : normalHowToText;
             }
             Show(Page.HowTo);
+        }
+
+        /// <summary>
+        /// 練習するミニゲームの説明文。【操作タイプ】は inputType から自動で作り、
+        /// 【説明】には description（空なら指示文）を入れる
+        /// </summary>
+        static string PracticeHowToText(MiniGameInfo info)
+        {
+            string controls = info.inputType switch
+            {
+                InputType.Direction => "十字キー / WASD：いどう",
+                InputType.Button => "Space / Z / Enter：ボタン",
+                InputType.Pointer => "マウス：クリック",
+                _ => "十字キー / WASD：いどう\nSpace / Z / Enter：ボタン",
+            };
+            string text = $"【操作タイプ】\n{controls}";
+
+            string description = !string.IsNullOrWhiteSpace(info.description)
+                ? info.description.Trim()
+                : !string.IsNullOrWhiteSpace(info.instruction) ? $"「{info.instruction}」" : null;
+            if (description != null) text += $"\n\n【説明】\n{description}";
+            return text;
         }
 
         void Back()

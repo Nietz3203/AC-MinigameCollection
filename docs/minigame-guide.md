@@ -107,10 +107,13 @@ namespace MiniGames.Nietz.Catch
 | gameId | 他と重ならないID（例：`nietz_catch`） |
 | title / author | タイトルと作者名 |
 | instruction | 開始前に出る指示（例：`つかめ！`）。短く！ |
-| inputType | 使う操作 |
+| description | 練習モードの「操作説明」画面の **【説明】** に出る文。遊び方を数行で書きます（例：`かごを うごかして、おちてくる りんごを つかもう！`）。空なら instruction が出ます |
+| inputType | 使う操作。練習モードの「操作説明」画面の **【操作タイプ】** に自動で表示されます |
 | length | Normal（4秒） / Long（8秒） |
 | judgeType | Survive（何もなければ成功） / Achieve（何もしなければ失敗） |
 | scenePath | 空でOK（自動で入ります） |
+| bgm / bgmVolume | このゲームの BGM と音量。空なら共通の BGM が流れます。1倍速でゲームの長さ（4秒 / 8秒）ぴったりの曲がおすすめ |
+| noBgm | オンにすると BGM を流しません（共通の BGM も流れません） |
 
 ### シーンを作る
 
