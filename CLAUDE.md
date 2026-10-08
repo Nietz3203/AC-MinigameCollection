@@ -24,7 +24,7 @@ Assets/
 │   ├─ Scripts/Title/    MiniGameFramework.Title.asmdef（タイトル画面。UI / TMP を参照）
 │   ├─ Scripts/Editor/   MiniGameFramework.Editor.asmdef（MiniGame メニュー）
 │   ├─ Scenes/           Title.unity（Build 先頭）→ Main.unity
-│   ├─ Resources/Fonts/  HUD 用フォント（M PLUS Rounded 1c、OFL）
+│   ├─ Resources/Fonts/  フォント（すべて OFL）。指示文＝Dela Gothic One、UI＝M PLUS Rounded 1c、英字＝Tourney
 │   ├─ Prefabs/          Core 専用の Prefab
 │   └─ MiniGameCatalog.asset（自動生成。手で編集しない）
 ├─ MiniGames/
@@ -41,7 +41,7 @@ docs/minigame-guide.md   メンバー向けの作り方・ルール
 
 1. ベースの画面（MiniGameStage）が表示された状態で、開始前ジングル＋アニメ。**裏でミニゲームのシーンを Additive 読み込みし、`Prepare`（timeScale 0 のまま Setup）**
 2. 指示文を表示しつつ、ベースの画面をフェードアウト（拡大しながら alpha 1→0）
-3. `MiniGameSession.Play`：timeScale = 速度、BGM 開始、`Begin`。指示文はゲームを止めずにゲーム内 0.8 秒で消える。制限時間（Normal 4秒 / Long 8秒、ゲーム内時間）で `End`、timeScale 0、BGM 停止
+3. `MiniGameSession.Play`：timeScale = 速度、BGM 開始、`Begin`。指示文（`hud.ShowInstruction` / `HideInstruction`）は縮みながらフェードインし、ゲームを止めずにゲーム内 0.8 秒で拡大しながらフェードアウトし始める（約 1 秒で消える）。制限時間（Normal 4秒 / Long 8秒、ゲーム内時間）で `End`、timeScale 0、BGM 停止
 4. ベースの画面をフェードイン → 裏でシーンを破棄、重力を元に戻す
 5. 成功・失敗ジングル＋アニメ、ライフ更新。4ゲームごとにスピードアップ（1.0〜2.0倍）、12ゲームごとに難易度 Lv+1（最大3）
 6. ライフ 0 でゲームオーバー → 「ボタン：もう一度 / Esc・B：タイトルへ」
@@ -58,6 +58,8 @@ MiniGameStage がシーンにないときは、OnGUI の文字だけの簡易表
 | `Runtime/MiniGameSession.cs` | `Prepare` / `Play` / `Run`（Run はデバッグ起動用で結果を文字表示） |
 | `Runtime/MiniGameRunner.cs` | 本番の進行役。通常プレイ / 練習モード、ライフ・速度・難易度、共通 BGM（Normal / Long） |
 | `Runtime/MiniGameStage.cs` | ベースの画面（Screen Space - Overlay の Canvas、CanvasGroup の alpha でフェード、Sort Order を 1000 に）。ジングル、Animator トリガー `Intro` / `Success` / `Failure` / `Return`（成功・失敗のジングル後）/ `SpeedUp` / `GameOver`（送る前に他のトリガーはリセット）、ライフ・スコアの UnityEvent。左右の扉（任意）がフェードと同時にスライドで開閉し、扉の Animator には上のトリガー＋ `Open` / `Close` が送られる |
+| `Runtime/FloorIndicator.cs` | 開始前ジングルのたびに今の階（スコア＋1、`{0}F`）を表示。自分の CanvasGroup でフェードイン → 前の階が下へスクロールアウト → 今の階が上からスクロールイン → フェードアウトして消える（TMP）。Stage は表示が終わるまで Intro を延ばす |
+| `Runtime/StageBanner.cs` | ベースの画面に一時的に出す文字（「SPEED UP!」）。ジングルの長さだけ、拡大しながらフェードイン → 点滅 → 広がりながらフェードアウト。Stage の Speed Up Banner に設定 |
 | `Runtime/LifeIcons.cs` | ライフのアイコン表示。ミスで右から Trigger `Lose`、リトライで Rebind。アイコンは破壊・非表示にしない |
 | `Runtime/MiniGameDebugRunner.cs` | ミニゲームのシーンを直接 Play したときの単体テスト（エディタ専用）。F1〜F3 難易度、F5/F6 速度 |
 | `Runtime/MiniGameInput.cs` | 入力ラッパー。`Direction`、`Action` / `ActionDown` / `ActionUp`（Space / Z / Enter / パッドA）、`Pointer*`、`PointerWorldPosition()` |
@@ -90,7 +92,7 @@ MiniGameStage がシーンにないときは、OnGUI の文字だけの簡易表
 - 禁止：`Time.unscaledDeltaTime` / `WaitForSecondsRealtime` / `Time.realtimeSinceStartup` / `DateTime`、`Time.timeScale` の変更、Animator の Unscaled Time、`SceneManager.LoadScene`、`DontDestroyOnLoad`、`Application.Quit`、旧 Input、static な状態の保持、Tags / Layers / ProjectSettings / Packages の変更
 - グローバル設定（`Physics2D.gravity` など）を変えたら `OnTimeUp` で戻す
 - 音は `PlaySE` / `PlayBGM` で鳴らす（自前の AudioSource だと BGM / 効果音の音量設定が効かない）
-- 開始から約 0.8 秒は画面中央に指示文が重なるので、その間にすぐ失敗する仕掛けを出さない
+- 開始から約 1 秒は画面中央に指示文が重なるので、その間にすぐ失敗する仕掛けを出さない
 - UI の Canvas は Screen Space - Camera 推奨（Overlay なら Sort Order 1000 未満）
 - シーンに AudioListener / EventSystem を置かない
 

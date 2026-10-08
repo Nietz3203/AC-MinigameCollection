@@ -39,7 +39,8 @@ namespace MiniGameFramework
         {
             var info = game.Info;
 
-            hud.CenterText = info.instruction;
+            // Runner は切り替えの前から出しているので、そのときは続けて表示される
+            hud.ShowInstruction(info.instruction, speed);
             hud.TimerRatio = 1f;
 
             // プレイ：timeScale = 速度なので、Time.deltaTime で作れば自動で速くなる
@@ -66,11 +67,11 @@ namespace MiniGameFramework
                 if (instructionVisible && elapsed >= InstructionSeconds)
                 {
                     instructionVisible = false;
-                    hud.CenterText = null;
+                    hud.HideInstruction();
                 }
                 yield return null;
             }
-            if (instructionVisible) hud.CenterText = null;
+            if (instructionVisible) hud.HideInstruction();
 
             Time.timeScale = 0f;
             var result = game.End();
