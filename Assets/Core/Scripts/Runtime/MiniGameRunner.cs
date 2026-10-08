@@ -251,7 +251,7 @@ namespace MiniGameFramework
                 while (!introDone) yield return null;
 
                 // 指示文は切り替え（フェードアウト）の間から出しておき、そのままプレイに入る
-                hud.CenterText = info.instruction;
+                hud.ShowInstruction(info.instruction, speed);
                 if (stage != null) yield return stage.FadeOut(speed);
 
                 var defaultBgm = info.length == GameLength.Long && defaultBgmLong != null

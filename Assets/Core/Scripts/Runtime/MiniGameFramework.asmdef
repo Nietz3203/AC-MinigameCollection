@@ -2,7 +2,8 @@
     "name": "MiniGameFramework",
     "rootNamespace": "MiniGameFramework",
     "references": [
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

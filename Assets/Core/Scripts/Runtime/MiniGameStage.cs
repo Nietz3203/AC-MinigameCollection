@@ -36,6 +36,8 @@ namespace MiniGameFramework
         [Header("フェード（1倍速時の秒数）")]
         [SerializeField] float fadeOutSeconds = 0.3f;
         [SerializeField] float fadeInSeconds = 0.3f;
+        [Tooltip("指示文が出てから、フェードアウト（扉が開く）を始めるまで")]
+        [SerializeField] float fadeOutDelay = 0f;
         [Tooltip("ミニゲームに切り替わるとき、ベースの画面をこの倍率まで拡大しながら消す（1 で拡大しない）")]
         [SerializeField] float zoomScale = 1.3f;
 
@@ -80,6 +82,16 @@ namespace MiniGameFramework
         public UnityEvent<string> onScoreChanged = new UnityEvent<string>();
         [Tooltip("ライフが変わったときに数値で呼ばれる。LifeIcons の SetLives につなぐ")]
         public UnityEvent<int> onLivesValueChanged = new UnityEvent<int>();
+
+        [Header("階の表示（なくてもよい）")]
+        [Tooltip("開始前のジングルのたびに、今の階（何本目のゲームか）を表示する")]
+        [SerializeField] FloorIndicator floorIndicator;
+
+        [Header("スピードアップの表示（なくてもよい）")]
+        [Tooltip("スピードアップのジングルの間だけ出す文字（「SPEED UP!」の TextMeshPro などに StageBanner を付けたもの）")]
+        [SerializeField] StageBanner speedUpBanner;
+
+        int currentScore;
 
         public bool HideHudHeader => hideHudHeader;
 
@@ -134,13 +146,28 @@ namespace MiniGameFramework
 
         public void SetStatus(int lives, int score)
         {
+            currentScore = score;
             onLivesChanged.Invoke(lives.ToString());
             onScoreChanged.Invoke(score.ToString());
             onLivesValueChanged.Invoke(lives);
         }
 
-        public IEnumerator PlayIntro(float speed) =>
-            PlayJingle(introJingle, introSeconds, "Intro", speed);
+        /// <summary>
+        /// 開始前のジングル。階の表示も同時に始め、両方が終わるまで待つ
+        /// （このあと Runner が指示文を出してフェードアウトするので、階の表示はその前に終わる）
+        /// </summary>
+        public IEnumerator PlayIntro(float speed)
+        {
+            Coroutine floor = null;
+            if (floorIndicator != null && floorIndicator.isActiveAndEnabled)
+            {
+                // スコア＝遊び終わったゲームの数なので、これから遊ぶのは「スコア＋1」階
+                floor = StartCoroutine(floorIndicator.Play(currentScore + 1, speed));
+            }
+
+            yield return PlayJingle(introJingle, introSeconds, "Intro", speed);
+            if (floor != null) yield return floor;
+        }
 
         /// <summary>成功・失敗のジングル。終わったら Return トリガーを送る（Success / Failure の状態から戻すのに使う）</summary>
         public IEnumerator PlayResult(bool success, float speed)
@@ -152,14 +179,27 @@ namespace MiniGameFramework
             SendDoorTrigger("Return", speed);
         }
 
-        public IEnumerator PlaySpeedUp(float speed) =>
-            PlayJingle(speedUpJingle, speedUpSeconds, "SpeedUp", speed);
+        public IEnumerator PlaySpeedUp(float speed)
+        {
+            // 文字はジングルと同じ長さだけ出す
+            if (speedUpBanner != null && speedUpBanner.isActiveAndEnabled)
+            {
+                float seconds = (speedUpJingle != null ? speedUpJingle.length : speedUpSeconds) / speed;
+                StartCoroutine(speedUpBanner.Play(seconds, speed));
+            }
+            return PlayJingle(speedUpJingle, speedUpSeconds, "SpeedUp", speed);
+        }
 
         public IEnumerator PlayGameOver(float speed) =>
             PlayJingle(gameOverJingle, gameOverSeconds, "GameOver", speed);
 
         /// <summary>ベースの画面を消し、扉を開けて、ミニゲームを見せる</summary>
-        public IEnumerator FadeOut(float speed) => Transition(true, fadeOutSeconds / speed, speed);
+        public IEnumerator FadeOut(float speed)
+        {
+            // Runner は指示文を出してすぐにこれを呼ぶので、ここで待つと「指示文 → フェードアウト」の間になる
+            if (fadeOutDelay > 0f) yield return new WaitForSecondsRealtime(fadeOutDelay / speed);
+            yield return Transition(true, fadeOutSeconds / speed, speed);
+        }
 
         /// <summary>ベースの画面を戻し、扉を閉めて、ミニゲームを隠す</summary>
         public IEnumerator FadeIn(float speed) => Transition(false, fadeInSeconds / speed, speed);
