@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BackGroundAnimationClip
+  m_Name: LeftDoor_failed
   serializedVersion: 7
   m_Legacy: 0
   m_Compressed: 0
@@ -21,13 +21,13 @@ AnimationClip:
   - serializedVersion: 2
     curve:
     - time: 0
-      value: {fileID: 21300000, guid: 1ca066f7f71e7e747984fa3859724ef3, type: 3}
+      value: {fileID: 21300000, guid: acad685dbf65c4343835a65d09d5fd44, type: 3}
     - time: 0.1
-      value: {fileID: 21300000, guid: 5046fa1e64a1bc142bba8d2d4621d716, type: 3}
+      value: {fileID: 21300000, guid: 1630f51c6e56b7a47abfefb76d2efa4e, type: 3}
     - time: 0.2
-      value: {fileID: 21300000, guid: eeea7b946b1f10a459a937b8aed5744a, type: 3}
+      value: {fileID: 21300000, guid: 9bc82abae1555fa4d8e2506524eb626d, type: 3}
     - time: 0.3
-      value: {fileID: 21300000, guid: 1ca066f7f71e7e747984fa3859724ef3, type: 3}
+      value: {fileID: 21300000, guid: acad685dbf65c4343835a65d09d5fd44, type: 3}
     attribute: m_Sprite
     path: 
     classID: 114
@@ -50,10 +50,10 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     pptrCurveMapping:
-    - {fileID: 21300000, guid: 1ca066f7f71e7e747984fa3859724ef3, type: 3}
-    - {fileID: 21300000, guid: 5046fa1e64a1bc142bba8d2d4621d716, type: 3}
-    - {fileID: 21300000, guid: eeea7b946b1f10a459a937b8aed5744a, type: 3}
-    - {fileID: 21300000, guid: 1ca066f7f71e7e747984fa3859724ef3, type: 3}
+    - {fileID: 21300000, guid: acad685dbf65c4343835a65d09d5fd44, type: 3}
+    - {fileID: 21300000, guid: 1630f51c6e56b7a47abfefb76d2efa4e, type: 3}
+    - {fileID: 21300000, guid: 9bc82abae1555fa4d8e2506524eb626d, type: 3}
+    - {fileID: 21300000, guid: acad685dbf65c4343835a65d09d5fd44, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}

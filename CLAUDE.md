@@ -57,7 +57,7 @@ MiniGameStage がシーンにないときは、OnGUI の文字だけの簡易表
 | `Runtime/MiniGameTypes.cs` | `MiniGameResult` / `JudgeType`（Survive＝何もなければ成功、Achieve＝何もしなければ失敗）/ `GameLength` / `InputType` |
 | `Runtime/MiniGameSession.cs` | `Prepare` / `Play` / `Run`（Run はデバッグ起動用で結果を文字表示） |
 | `Runtime/MiniGameRunner.cs` | 本番の進行役。通常プレイ / 練習モード、ライフ・速度・難易度、共通 BGM（Normal / Long） |
-| `Runtime/MiniGameStage.cs` | ベースの画面（Screen Space - Overlay の Canvas、CanvasGroup の alpha でフェード、Sort Order を 1000 に）。ジングル、Animator トリガー `Intro` / `Success` / `Failure` / `SpeedUp` / `GameOver`、ライフ・スコアの UnityEvent |
+| `Runtime/MiniGameStage.cs` | ベースの画面（Screen Space - Overlay の Canvas、CanvasGroup の alpha でフェード、Sort Order を 1000 に）。ジングル、Animator トリガー `Intro` / `Success` / `Failure` / `Return`（成功・失敗のジングル後）/ `SpeedUp` / `GameOver`（送る前に他のトリガーはリセット）、ライフ・スコアの UnityEvent。左右の扉（任意）がフェードと同時にスライドで開閉し、扉の Animator には上のトリガー＋ `Open` / `Close` が送られる |
 | `Runtime/LifeIcons.cs` | ライフのアイコン表示。ミスで右から Trigger `Lose`、リトライで Rebind。アイコンは破壊・非表示にしない |
 | `Runtime/MiniGameDebugRunner.cs` | ミニゲームのシーンを直接 Play したときの単体テスト（エディタ専用）。F1〜F3 難易度、F5/F6 速度 |
 | `Runtime/MiniGameInput.cs` | 入力ラッパー。`Direction`、`Action` / `ActionDown` / `ActionUp`（Space / Z / Enter / パッドA）、`Pointer*`、`PointerWorldPosition()` |

@@ -14,6 +14,15 @@ namespace MiniGameFramework
     /// ジングルとアニメーションは、ゲーム速度に合わせて速くなる。
     /// Animator には次のトリガーを（使うものだけ）作っておくと、それぞれの場面で送られる：
     ///   Intro / Success / Failure / SpeedUp / GameOver
+    ///   Return（成功・失敗のジングルが終わったとき。Success / Failure の状態から戻すのに使う）
+    ///
+    /// 扉（なくてもよい）：左右の扉を置くと、ミニゲームに切り替わるときに左右へスライドしながら
+    /// ベースの画面と一緒にフェードアウトし、戻るときに閉じながらフェードインする。
+    ///   Screen
+    ///   ├─ LeftDoor   ← Left Door に設定。Animator を付けて Door Animators にも入れる
+    ///   └─ RightDoor  ← Right Door に設定。同じく Door Animators に入れる
+    /// 扉の Animator には、上のトリガーに加えて Open / Close（開き始め・閉じ始め）が送られる。
+    /// 扉の位置はスクリプトが動かすので、扉のアニメーションでは位置（Anchored Position）を動かさない。
     /// </summary>
     public class MiniGameStage : MonoBehaviour
     {
@@ -29,6 +38,23 @@ namespace MiniGameFramework
         [SerializeField] float fadeInSeconds = 0.3f;
         [Tooltip("ミニゲームに切り替わるとき、ベースの画面をこの倍率まで拡大しながら消す（1 で拡大しない）")]
         [SerializeField] float zoomScale = 1.3f;
+
+        [Header("扉（なくてもよい。フェードと同じ時間で開閉する）")]
+        [Tooltip("左の扉。エディタで置いた位置が「閉じた位置」で、開くと左へ扉の幅だけずれる")]
+        [SerializeField] RectTransform leftDoor;
+        [Tooltip("右の扉。開くと右へ扉の幅だけずれる")]
+        [SerializeField] RectTransform rightDoor;
+        [Tooltip("開いたとき、扉の幅に加えてさらに外へずらす距離")]
+        [SerializeField] float doorExtraDistance = 0f;
+        [Tooltip("フェードアウトのとき、扉をフレーム（ベースの画面全体）より何秒先に消し始めるか（1倍速時）。0 なら同時")]
+        [SerializeField] float doorFadeLead = 0.1f;
+        [Tooltip("開くときの動き（横 0〜1 = 時間、縦 0〜1 = 開き具合）")]
+        [SerializeField] AnimationCurve doorOpenCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        [Tooltip("閉じるときの動き（横 0〜1 = 時間、縦 0〜1 = 閉じ具合）")]
+        [SerializeField] AnimationCurve doorCloseCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        [Tooltip("扉のアニメーション（なくてもよい。左右それぞれなど、いくつでも）。全部に Intro / Success / Failure / Return / SpeedUp / GameOver / Open / Close が送られる。\n" +
+                 "扉の位置（Anchored Position）はスクリプトが動かすので、アニメーションでは位置を動かさない（回転・大きさ・色や、子の絵を動かす）")]
+        [SerializeField] Animator[] doorAnimators = new Animator[0];
 
         [Header("ジングル")]
         [Tooltip("空なら自動で追加される")]
@@ -57,6 +83,12 @@ namespace MiniGameFramework
 
         public bool HideHudHeader => hideHudHeader;
 
+        Vector2 leftDoorClosed;
+        Vector2 rightDoorClosed;
+        CanvasGroup leftDoorGroup;
+        CanvasGroup rightDoorGroup;
+        int lastTriggerFrame = -1;
+
         void Awake()
         {
             if (jingleSource == null)
@@ -67,6 +99,16 @@ namespace MiniGameFramework
 
             // ベースの画面は Time.timeScale = 0 の間に動くので、時間の影響を受けないようにする
             if (animator != null) animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+            foreach (var a in doorAnimators)
+            {
+                if (a != null) a.updateMode = AnimatorUpdateMode.UnscaledTime;
+            }
+
+            if (leftDoor != null) leftDoorClosed = leftDoor.anchoredPosition;
+            if (rightDoor != null) rightDoorClosed = rightDoor.anchoredPosition;
+            // 扉だけ先に消せるように、扉ごとの透明度を持たせる（Screen の透明度と掛け合わされる）
+            leftDoorGroup = GetOrAddCanvasGroup(leftDoor);
+            rightDoorGroup = GetOrAddCanvasGroup(rightDoor);
 
             if (screen == null)
             {
@@ -100,9 +142,15 @@ namespace MiniGameFramework
         public IEnumerator PlayIntro(float speed) =>
             PlayJingle(introJingle, introSeconds, "Intro", speed);
 
-        public IEnumerator PlayResult(bool success, float speed) => success
-            ? PlayJingle(successJingle, resultSeconds, "Success", speed)
-            : PlayJingle(failureJingle, resultSeconds, "Failure", speed);
+        /// <summary>成功・失敗のジングル。終わったら Return トリガーを送る（Success / Failure の状態から戻すのに使う）</summary>
+        public IEnumerator PlayResult(bool success, float speed)
+        {
+            yield return success
+                ? PlayJingle(successJingle, resultSeconds, "Success", speed)
+                : PlayJingle(failureJingle, resultSeconds, "Failure", speed);
+            SendTrigger(animator, "Return", speed);
+            SendDoorTrigger("Return", speed);
+        }
 
         public IEnumerator PlaySpeedUp(float speed) =>
             PlayJingle(speedUpJingle, speedUpSeconds, "SpeedUp", speed);
@@ -110,23 +158,18 @@ namespace MiniGameFramework
         public IEnumerator PlayGameOver(float speed) =>
             PlayJingle(gameOverJingle, gameOverSeconds, "GameOver", speed);
 
-        /// <summary>ベースの画面を消して、ミニゲームを見せる</summary>
-        public IEnumerator FadeOut(float speed) =>
-            Fade(1f, 0f, 1f, zoomScale, fadeOutSeconds / speed);
+        /// <summary>ベースの画面を消し、扉を開けて、ミニゲームを見せる</summary>
+        public IEnumerator FadeOut(float speed) => Transition(true, fadeOutSeconds / speed, speed);
 
-        /// <summary>ベースの画面を戻して、ミニゲームを隠す</summary>
-        public IEnumerator FadeIn(float speed) =>
-            Fade(0f, 1f, zoomScale, 1f, fadeInSeconds / speed);
+        /// <summary>ベースの画面を戻し、扉を閉めて、ミニゲームを隠す</summary>
+        public IEnumerator FadeIn(float speed) => Transition(false, fadeInSeconds / speed, speed);
 
         // ------------------------------------------------------------------
 
         IEnumerator PlayJingle(AudioClip clip, float fallbackSeconds, string trigger, float speed)
         {
-            if (animator != null)
-            {
-                animator.speed = speed;
-                SetTriggerIfExists(trigger);
-            }
+            SendTrigger(animator, trigger, speed);
+            SendDoorTrigger(trigger, speed);
 
             float seconds = fallbackSeconds;
             if (clip != null)
@@ -140,20 +183,42 @@ namespace MiniGameFramework
             yield return new WaitForSecondsRealtime(seconds / speed);
         }
 
-        IEnumerator Fade(float fromAlpha, float toAlpha, float fromScale, float toScale, float duration)
+        /// <param name="toGame">true ならミニゲームへ（消す・開く）、false ならベースの画面へ（戻す・閉じる）</param>
+        IEnumerator Transition(bool toGame, float duration, float speed)
         {
             if (screen == null) yield break;
+
+            float fromAlpha = toGame ? 1f : 0f;
+            float fromScale = toGame ? 1f : zoomScale;
+            float toAlpha = 1f - fromAlpha;
+            float toScale = toGame ? zoomScale : 1f;
+            var doorCurve = toGame ? doorOpenCurve : doorCloseCurve;
+
+            // フェードアウトでは、扉が先に消え始め、フレーム（Screen 全体）は lead 秒遅れて消え始める
+            float lead = toGame ? Mathf.Max(0f, doorFadeLead) / speed : 0f;
+            float total = duration + lead;
+
+            SendDoorTrigger(toGame ? "Open" : "Close", speed);
+            SetDoorAlpha(1f);
 
             // フェード中はクリックを止めておく
             screen.blocksRaycasts = true;
 
-            for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
+            for (float t = 0f; t < total; t += Time.unscaledDeltaTime)
             {
-                float k = Mathf.SmoothStep(0f, 1f, t / duration);
-                SetScreen(Mathf.Lerp(fromAlpha, toAlpha, k), Mathf.Lerp(fromScale, toScale, k));
+                float doorK = Mathf.Clamp01(t / duration);
+                float screenK = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - lead) / duration));
+                SetScreen(Mathf.Lerp(fromAlpha, toAlpha, screenK), Mathf.Lerp(fromScale, toScale, screenK));
+
+                float moved = doorCurve.Evaluate(doorK);
+                SetDoors(toGame ? moved : 1f - moved);
+                if (toGame && lead > 0f) SetDoorAlpha(1f - Mathf.SmoothStep(0f, 1f, doorK));
                 yield return null;
             }
             SetScreen(toAlpha, toScale);
+            SetDoors(toGame ? 1f : 0f);
+            // 扉の透明度は戻しておく（Screen が透明なので見えない）。次に閉じるときはそのまま見える
+            SetDoorAlpha(1f);
 
             // 消えている間は、下のミニゲームの UI にクリックを通す
             bool visible = toAlpha > 0.5f;
@@ -167,15 +232,72 @@ namespace MiniGameFramework
             screen.transform.localScale = new Vector3(scale, scale, 1f);
         }
 
-        void SetTriggerIfExists(string triggerName)
+        /// <param name="open">0 = 閉じている、1 = 開いている</param>
+        void SetDoors(float open)
         {
-            foreach (var p in animator.parameters)
+            if (leftDoor != null)
+            {
+                leftDoor.anchoredPosition = leftDoorClosed + Vector2.left * (DoorWidth(leftDoor) + doorExtraDistance) * open;
+            }
+            if (rightDoor != null)
+            {
+                rightDoor.anchoredPosition = rightDoorClosed + Vector2.right * (DoorWidth(rightDoor) + doorExtraDistance) * open;
+            }
+        }
+
+        static float DoorWidth(RectTransform door) => door.rect.width * Mathf.Abs(door.localScale.x);
+
+        void SetDoorAlpha(float alpha)
+        {
+            if (leftDoorGroup != null) leftDoorGroup.alpha = alpha;
+            if (rightDoorGroup != null) rightDoorGroup.alpha = alpha;
+        }
+
+        static CanvasGroup GetOrAddCanvasGroup(RectTransform target)
+        {
+            if (target == null) return null;
+            var group = target.GetComponent<CanvasGroup>();
+            return group != null ? group : target.gameObject.AddComponent<CanvasGroup>();
+        }
+
+        void SendDoorTrigger(string triggerName, float speed)
+        {
+            foreach (var a in doorAnimators) SendTrigger(a, triggerName, speed);
+        }
+
+        /// <summary>
+        /// Animator にそのトリガーがあれば送る（ないものは無視する）。
+        /// そのフレームで最初に送るときは、前のフレームから使われずに残っているトリガーを消す
+        /// （あとで勝手に遷移しないように）。同じフレームに送ったもの（Return の直後の Intro など）は消さない
+        /// </summary>
+        void SendTrigger(Animator target, string triggerName, float speed)
+        {
+            if (target == null) return;
+
+            if (lastTriggerFrame != Time.frameCount)
+            {
+                lastTriggerFrame = Time.frameCount;
+                ResetTriggers(animator);
+                foreach (var a in doorAnimators) ResetTriggers(a);
+            }
+
+            target.speed = speed;
+            foreach (var p in target.parameters)
             {
                 if (p.type == AnimatorControllerParameterType.Trigger && p.name == triggerName)
                 {
-                    animator.SetTrigger(triggerName);
+                    target.SetTrigger(triggerName);
                     return;
                 }
+            }
+        }
+
+        static void ResetTriggers(Animator target)
+        {
+            if (target == null) return;
+            foreach (var p in target.parameters)
+            {
+                if (p.type == AnimatorControllerParameterType.Trigger) target.ResetTrigger(p.name);
             }
         }
     }
