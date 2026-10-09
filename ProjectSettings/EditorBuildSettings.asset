@@ -12,8 +12,23 @@ EditorBuildSettings:
     path: Assets/Core/Scenes/Main.unity
     guid: 400e0982e7a9a724281bd0ac951d1f59
   - enabled: 1
+    path: Assets/MiniGames/Nietz_Catch/Catch.unity
+    guid: 1b12cc6d71f0dd343bf5a9b5dafb80cf
+  - enabled: 1
+    path: Assets/MiniGames/Nietz_Jump/Jump.unity
+    guid: 9af8da6407c47f2498d35b988b83585f
+  - enabled: 1
     path: Assets/MiniGames/Nietz_Mash/Mash.unity
     guid: 3e7523ca2f43f504a82b7447a7cfe633
+  - enabled: 1
+    path: Assets/MiniGames/Nietz_Pop/Pop.unity
+    guid: d1d6f0dbe68e97444923339545ee4d2a
+  - enabled: 1
+    path: Assets/MiniGames/Nietz_Shoot/Shoot.unity
+    guid: b039327176aa6954e9b60fcfc8f65589
+  - enabled: 1
+    path: Assets/MiniGames/Nietz_Stop/Stop.unity
+    guid: 3668ec8fffffa044790860a07f18c202
   - enabled: 1
     path: Assets/MiniGames/_Template/Dodge.unity
     guid: f12efe440fc573f4cbc15ad1aa742a2a

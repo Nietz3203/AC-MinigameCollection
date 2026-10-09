@@ -1,0 +1,16 @@
+{
+    "name": "MiniGames.Nietz.Stop",
+    "rootNamespace": "MiniGames.Nietz.Stop",
+    "references": [
+        "MiniGameFramework"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

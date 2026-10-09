@@ -1,0 +1,16 @@
+{
+    "name": "MiniGames.Nietz.Catch",
+    "rootNamespace": "MiniGames.Nietz.Catch",
+    "references": [
+        "MiniGameFramework"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

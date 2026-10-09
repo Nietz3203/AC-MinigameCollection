@@ -13,5 +13,10 @@ MonoBehaviour:
   m_Name: MiniGameCatalog
   m_EditorClassIdentifier: MiniGameFramework::MiniGameFramework.MiniGameCatalog
   games:
+  - {fileID: 11400000, guid: 04769cc27c8ae6b4ea8c763a3b6701b1, type: 2}
+  - {fileID: 11400000, guid: 97e073850a5dec447bf4b44e023e8852, type: 2}
   - {fileID: 11400000, guid: 16d7dd70df2a81e458e29d8e55e9cdec, type: 2}
+  - {fileID: 11400000, guid: 6cb906f91ef5bb143b1cc5ed7cbf2b2a, type: 2}
+  - {fileID: 11400000, guid: 2e2e452d414dbca4398b40e23a331c08, type: 2}
+  - {fileID: 11400000, guid: 97faa49ccb795734295409431b7c09da, type: 2}
   - {fileID: 11400000, guid: 2f616d30a4f8d2649b6a38ba62180db7, type: 2}
