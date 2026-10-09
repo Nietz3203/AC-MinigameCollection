@@ -1,0 +1,16 @@
+{
+    "name": "MiniGames.Nietz.Pop",
+    "rootNamespace": "MiniGames.Nietz.Pop",
+    "references": [
+        "MiniGameFramework"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

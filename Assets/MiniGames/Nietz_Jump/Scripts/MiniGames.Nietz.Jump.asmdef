@@ -1,0 +1,16 @@
+{
+    "name": "MiniGames.Nietz.Jump",
+    "rootNamespace": "MiniGames.Nietz.Jump",
+    "references": [
+        "MiniGameFramework"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
